@@ -8,7 +8,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:8788' },
+      // API_PORT: 기본 8788. (자동화 테스트가 별도 포트로 띄울 때만 바꾼다)
+      '/api': { target: `http://localhost:${process.env.API_PORT ?? 8788}` },
     },
   },
 });

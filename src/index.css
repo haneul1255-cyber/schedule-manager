@@ -133,3 +133,39 @@ h3 { font-size: 1rem; margin: 0; }
 .tooltip .tip-ok { color: #8ee0b0; }
 .tooltip .tip-no { color: #ffaba8; }
 .tooltip .tip-songs { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 4px; padding-top: 4px; border-top: 1px solid #444c56; }
+
+.section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 16px; }
+.section-head .section-title { margin: 0; }
+.chip {
+  font: inherit; font-size: 0.85rem; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--fg);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip:hover { border-color: var(--accent); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chip-count {
+  font-size: 0.7rem; min-width: 1.4em; padding: 0 4px; border-radius: 999px; text-align: center;
+  background: rgba(0, 0, 0, 0.08);
+}
+.chip.on .chip-count { background: rgba(255, 255, 255, 0.25); }
+.scope-selector { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 8px; }
+
+.song-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.song-row {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+}
+.song-title { font-weight: 600; }
+.song-members { flex: 1; min-width: 120px; }
+.song-actions { display: inline-flex; gap: 10px; }
+.song-editor {
+  display: flex; flex-direction: column; gap: 8px; padding: 10px; margin-top: 8px;
+  border: 1px dashed var(--accent); border-radius: var(--radius);
+}
+.text-input {
+  font: inherit; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--fg); max-width: 360px;
+}
+.member-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.song-logs { margin-top: 12px; padding: 10px; background: var(--bg); border-radius: var(--radius); font-size: 0.85rem; }
+.song-logs ul { margin: 6px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 3px; }

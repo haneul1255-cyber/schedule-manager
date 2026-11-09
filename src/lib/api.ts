@@ -58,6 +58,24 @@ export interface RoomInput {
   dayEnd: number;
 }
 
+export interface SongLogMember {
+  id: number;
+  name: string;
+}
+export interface SongSnapshot {
+  title: string;
+  members: SongLogMember[];
+}
+export interface SongLog {
+  id: number;
+  songId: number | null;
+  actorName: string;
+  action: 'create' | 'update' | 'delete';
+  detail: { before?: SongSnapshot; after?: SongSnapshot };
+  /** unix 초 */
+  createdAt: number;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -115,6 +133,13 @@ export const api = {
     request<{ ok: true }>('DELETE', `/api/rooms/${encodeURIComponent(id)}/members/${userId}`),
   saveAvailability: (id: string, availability: Record<string, string>) =>
     request<{ ok: true }>('PUT', `/api/rooms/${encodeURIComponent(id)}/availability`, availability),
+  createSong: (roomId: string, title: string, memberIds: number[]) =>
+    request<{ song: Song }>('POST', `/api/rooms/${encodeURIComponent(roomId)}/songs`, { title, memberIds }),
+  updateSong: (songId: number, input: { title?: string; memberIds?: number[] }) =>
+    request<{ song: Song }>('PATCH', `/api/songs/${songId}`, input),
+  deleteSong: (songId: number) => request<{ ok: true }>('DELETE', `/api/songs/${songId}`),
+  songLogs: (roomId: string) =>
+    request<{ logs: SongLog[] }>('GET', `/api/rooms/${encodeURIComponent(roomId)}/song-logs`),
   regenerateInvite: (id: string) =>
     request<{ inviteCode: string }>('POST', `/api/rooms/${encodeURIComponent(id)}/invite-code`),
 };

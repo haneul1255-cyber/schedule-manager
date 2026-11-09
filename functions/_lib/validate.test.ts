@@ -3,7 +3,9 @@ import {
   validateAvailability,
   validateDates,
   validateDisplayName,
+  validateMemberIds,
   validatePassword,
+  validateSongTitle,
   validateTimeRange,
   validateUsername,
 } from './validate';
@@ -86,5 +88,21 @@ describe('validateAvailability', () => {
   });
   it('빈 본문 거부', () => {
     expect(() => validateAvailability({}, dates, 4)).toThrow();
+  });
+});
+
+describe('곡 입력', () => {
+  it('validateSongTitle: 1~50자, 앞뒤 공백 제거', () => {
+    expect(validateSongTitle('  Don\'t Look Back in Anger ')).toBe("Don't Look Back in Anger");
+    expect(() => validateSongTitle('  ')).toThrow();
+    expect(() => validateSongTitle('가'.repeat(51))).toThrow();
+  });
+  it('validateMemberIds: 양의 정수 배열, 중복 제거', () => {
+    expect(validateMemberIds([3, 1, 3])).toEqual([3, 1]);
+    expect(validateMemberIds([])).toEqual([]);
+    expect(() => validateMemberIds('1,2')).toThrow();
+    expect(() => validateMemberIds([1, '2'])).toThrow();
+    expect(() => validateMemberIds([0])).toThrow();
+    expect(() => validateMemberIds([1.5])).toThrow();
   });
 });

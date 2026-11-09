@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AvailabilityGrid from '../components/AvailabilityGrid';
 import MemberList from '../components/MemberList';
 import ResultPanel from '../components/ResultPanel';
 import RoomSettings from '../components/RoomSettings';
+import ScopeSelector from '../components/ScopeSelector';
+import SongManager from '../components/SongManager';
 import { api, ApiError, type RoomData, type RoomMember } from '../lib/api';
 import { formatDateLabel } from '../lib/dates';
+import { formatSongsParam, parseSongsParam } from '../lib/scope';
 import {
   gridFromAvailability,
   gridToAvailability,
@@ -105,10 +108,38 @@ export default function Room() {
     return { ...data.availability, [data.me.id]: gridToAvailability(data.dates, myGrid) };
   }, [data, myGrid]);
 
-  // 결과 범위. 곡 선택은 6단계에서 추가 — 지금은 항상 전체합주(방 멤버 전원)
-  const selectedSongIds: number[] = [];
+  // 결과 범위: 선택한 곡은 URL 쿼리(?songs=3,5)에 둔다 → 링크를 공유하면 같은 화면
+  const [searchParams, setSearchParams] = useSearchParams();
+  const songsParam = searchParams.get('songs');
+  const selectedSongIds = useMemo(() => {
+    const ids = parseSongsParam(songsParam);
+    return data ? ids.filter((id) => data.songs.some((s) => s.id === id)) : ids;
+  }, [songsParam, data]);
+  const setSelectedSongIds = useCallback(
+    (ids: number[]) =>
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (ids.length) next.set('songs', formatSongsParam(ids));
+          else next.delete('songs');
+          return next;
+        },
+        { replace: true },
+      ),
+    [setSearchParams],
+  );
+  // 삭제된 곡 등 없는 ID가 URL에 남아 있으면 정리
+  useEffect(() => {
+    if (data && songsParam !== null && formatSongsParam(selectedSongIds) !== songsParam) {
+      setSelectedSongIds(selectedSongIds);
+    }
+  }, [data, songsParam, selectedSongIds, setSelectedSongIds]);
+
   const memberIds = useMemo(() => data?.members.map((m) => m.id) ?? [], [data]);
-  const scope = useMemo(() => scopeMembers([], {}, memberIds), [memberIds]);
+  const scope = useMemo(() => {
+    const songMembers = Object.fromEntries((data?.songs ?? []).map((s) => [s.id, s.memberIds]));
+    return scopeMembers(selectedSongIds, songMembers, memberIds);
+  }, [selectedSongIds, data, memberIds]);
 
   /** 확인 → API 호출 → 다시 불러오기. 실패하면 알림. */
   async function act(confirmMsg: string | null, fn: () => Promise<unknown>, after?: () => void) {
@@ -199,6 +230,8 @@ export default function Room() {
             )
           }
         />
+
+        <SongManager roomId={id} songs={data.songs} members={data.members} isOwner={isOwner} onChanged={load} />
       </section>
 
       {isOwner && settingsOpen && (
@@ -268,6 +301,9 @@ export default function Room() {
           slotCount={slotCount(data.room.dayStart, data.room.dayEnd, data.room.slotMinutes)}
           scope={scope}
           selectedSongs={data.songs.filter((s) => selectedSongIds.includes(s.id))}
+          scopeSelector={
+            <ScopeSelector songs={data.songs} selected={selectedSongIds} onChange={setSelectedSongIds} />
+          }
         />
       </div>
     </div>

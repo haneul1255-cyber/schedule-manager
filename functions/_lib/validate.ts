@@ -114,3 +114,23 @@ export function validateAvailability(
   }
   return entries as [string, string][];
 }
+
+// ---- 곡 ----
+
+export const SONG_TITLE_MAX = 50;
+export const SONGS_PER_ROOM_MAX = 100;
+
+export function validateSongTitle(value: unknown): string {
+  const title = typeof value === 'string' ? value.trim() : '';
+  if (charLength(title) < 1 || charLength(title) > SONG_TITLE_MAX) {
+    throw new HttpError(400, `곡 제목은 1~${SONG_TITLE_MAX}자여야 합니다.`);
+  }
+  return title;
+}
+
+/** 형식만 검사 (중복 제거). 방 멤버인지는 DB에서 확인한다. */
+export function validateMemberIds(value: unknown): number[] {
+  if (!Array.isArray(value)) throw new HttpError(400, '참여 멤버 목록이 필요합니다.');
+  for (const v of value) validateUserId(v);
+  return [...new Set(value as number[])];
+}
