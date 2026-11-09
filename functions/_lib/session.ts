@@ -5,12 +5,24 @@ export const SESSION_COOKIE = 'session';
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 /**
- * 로컬 개발(http://localhost)에서는 Secure 쿠키를 저장하지 않는 브라우저(Safari 등)가 있어
- * Secure를 뺀다. 배포 환경은 항상 https이므로 Secure가 붙는다.
+ * 로컬 개발용 호스트인지: localhost, 루프백, 사설망 IP(같은 Wi-Fi의 휴대폰에서 접속할 때), *.local
+ */
+export function isLocalDevHost(hostname: string): boolean {
+  const h = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (h === 'localhost' || h === '::1' || h.endsWith('.local')) return true;
+  const m = /^(\d{1,3})\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(h);
+  if (!m) return false;
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+}
+
+/**
+ * 로컬 개발(http)에서는 브라우저가 Secure 쿠키를 저장하지 않으므로(특히 휴대폰에서 사설 IP로 접속할 때)
+ * Secure를 뺀다. 배포 환경(https, 공개 도메인)에서는 항상 Secure가 붙는다.
  */
 function isLocalHttp(request: Request): boolean {
   const url = new URL(request.url);
-  return url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  return url.protocol === 'http:' && isLocalDevHost(url.hostname);
 }
 
 function cookieAttrs(request: Request, maxAge: number): string {
