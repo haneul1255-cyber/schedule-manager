@@ -81,7 +81,13 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
   const data = (await res.json().catch(() => null)) as { error?: string } | null;
   if (!res.ok) {
-    throw new ApiError(res.status, data?.error ?? `요청에 실패했습니다. (${res.status})`);
+    if (data?.error) throw new ApiError(res.status, data.error);
+    // JSON 에러 본문이 없는 502~504: API 서버가 꺼져 있거나 응답하지 않음
+    // (로컬 개발에서는 `npm run dev:api`가 실행 중이 아닐 때 vite 프록시가 502를 돌려준다)
+    if (res.status >= 502 && res.status <= 504) {
+      throw new ApiError(res.status, 'API 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+    }
+    throw new ApiError(res.status, `요청에 실패했습니다. (${res.status})`);
   }
   return data as T;
 }
