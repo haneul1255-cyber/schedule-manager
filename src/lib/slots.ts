@@ -124,3 +124,118 @@ export function applyRect(grid: Grid, a: Cell, b: Cell, value: boolean): Grid {
 export function dragModeFor(grid: Grid, start: Cell): boolean {
   return !grid[start.col]?.[start.row];
 }
+
+// ---- 결과 계산 ----
+
+/** availability[userId][date] = '0101...' */
+export type AvailabilityMap = Readonly<Record<string | number, Readonly<Record<string, string>> | undefined>>;
+
+function isAvailable(availability: AvailabilityMap, userId: number, date: string, slot: number): boolean {
+  return availability[userId]?.[date]?.[slot] === '1';
+}
+
+/**
+ * 결과 범위에 들어가는 멤버.
+ * - 선택한 곡이 없으면 방 멤버 전원
+ * - 있으면 선택한 곡 멤버들의 합집합 (방 멤버 순서 유지, 방에 없는 ID와 모르는 곡은 무시)
+ */
+export function scopeMembers(
+  selectedSongIds: readonly number[],
+  songMembers: Readonly<Record<number, readonly number[]>>,
+  roomMemberIds: readonly number[],
+): number[] {
+  const known = selectedSongIds.filter((id) => songMembers[id] !== undefined);
+  if (known.length === 0) return [...roomMemberIds];
+  const union = new Set(known.flatMap((id) => songMembers[id]));
+  return roomMemberIds.filter((id) => union.has(id));
+}
+
+export interface HeatCell {
+  /** 가능 인원 */
+  count: number;
+  available: number[];
+  unavailable: number[];
+}
+
+/** 한 날짜의 슬롯별 가능 인원과 명단 */
+export function heatmap(
+  members: readonly number[],
+  availability: AvailabilityMap,
+  date: string,
+  slotCount: number,
+): HeatCell[] {
+  return Array.from({ length: slotCount }, (_, slot) => {
+    const available: number[] = [];
+    const unavailable: number[] = [];
+    for (const id of members) (isAvailable(availability, id, date, slot) ? available : unavailable).push(id);
+    return { count: available.length, available, unavailable };
+  });
+}
+
+export interface SongStatus {
+  songId: number;
+  /** 곡 멤버 전원이 가능 (멤버가 없는 곡은 false) */
+  ok: boolean;
+  /** 이 슬롯에 안 되는 곡 멤버 */
+  missing: number[];
+}
+
+/** 특정 슬롯에서 곡별로 합주 가능한지와 빠지는 사람 */
+export function songStatusAt(
+  songs: readonly { id: number; memberIds: readonly number[] }[],
+  availability: AvailabilityMap,
+  date: string,
+  slot: number,
+): SongStatus[] {
+  return songs.map((s) => {
+    const missing = s.memberIds.filter((id) => !isAvailable(availability, id, date, slot));
+    return { songId: s.id, ok: s.memberIds.length > 0 && missing.length === 0, missing };
+  });
+}
+
+export interface Block {
+  date: string;
+  /** 시작 슬롯 (포함) */
+  startSlot: number;
+  /** 끝 슬롯 (미포함) */
+  endSlot: number;
+}
+
+/**
+ * 범위 멤버 전원이 가능한 슬롯을 날짜별 연속 구간으로 묶는다.
+ * 길이가 긴 순, 같으면 날짜·시작 시각 순. 범위가 비어 있으면 빈 목록.
+ */
+export function fullBlocks(
+  members: readonly number[],
+  availability: AvailabilityMap,
+  dates: readonly string[],
+  slotCount: number,
+): Block[] {
+  if (members.length === 0) return [];
+  const blocks: Block[] = [];
+  for (const date of dates) {
+    let start = -1;
+    for (let slot = 0; slot <= slotCount; slot++) {
+      const full = slot < slotCount && members.every((id) => isAvailable(availability, id, date, slot));
+      if (full && start < 0) start = slot;
+      if (!full && start >= 0) {
+        blocks.push({ date, startSlot: start, endSlot: slot });
+        start = -1;
+      }
+    }
+  }
+  return blocks.sort(
+    (a, b) =>
+      b.endSlot - b.startSlot - (a.endSlot - a.startSlot) ||
+      a.date.localeCompare(b.date) ||
+      a.startSlot - b.startSlot,
+  );
+}
+
+/** 분 → "3시간", "1시간 30분", "30분" */
+export function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h && m) return `${h}시간 ${m}분`;
+  return h ? `${h}시간` : `${m}분`;
+}

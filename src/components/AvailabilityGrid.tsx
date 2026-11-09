@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { formatDateLabel, weekdayOf } from '../lib/dates';
+import { formatDateLabel } from '../lib/dates';
 import { applyRect, dragModeFor, minutesToHHMM, type Cell, type Grid } from '../lib/slots';
-import styles from './AvailabilityGrid.module.css';
+import GridHeader, { gridColumns } from './GridHeader';
+import styles from './TimeGrid.module.css';
 
 interface Props {
   dates: string[];
@@ -95,22 +96,12 @@ export default function AvailabilityGrid({ dates, dayStart, slotMinutes, value, 
       <div
         ref={gridRef}
         className={`${styles.grid} ${drag ? styles.dragging : ''} ${disabled ? styles.disabled : ''}`}
-        style={{ gridTemplateColumns: `44px repeat(${dates.length}, minmax(44px, 1fr))` }}
+        style={{ gridTemplateColumns: gridColumns(dates.length) }}
         onPointerDown={onPointerDown}
         role="grid"
         aria-label="내 가능 시간 입력"
       >
-        <div className={styles.corner} />
-        {dates.map((d) => {
-          const wd = weekdayOf(d);
-          const [md, w] = formatDateLabel(d).split('(');
-          return (
-            <div key={d} className={`${styles.dateHead} ${wd === 0 ? styles.sun : wd === 6 ? styles.sat : ''}`}>
-              {md}
-              <small>({w}</small>
-            </div>
-          );
-        })}
+        <GridHeader dates={dates} />
         {Array.from({ length: rows }, (_, r) => {
           const minutes = dayStart + r * slotMinutes;
           const onHour = minutes % 60 === 0;

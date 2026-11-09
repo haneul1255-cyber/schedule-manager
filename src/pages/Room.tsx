@@ -1,11 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AvailabilityGrid from '../components/AvailabilityGrid';
 import MemberList from '../components/MemberList';
+import ResultPanel from '../components/ResultPanel';
 import RoomSettings from '../components/RoomSettings';
 import { api, ApiError, type RoomData, type RoomMember } from '../lib/api';
 import { formatDateLabel } from '../lib/dates';
-import { gridFromAvailability, minutesToHHMM, slotCount, type Grid } from '../lib/slots';
+import {
+  gridFromAvailability,
+  gridToAvailability,
+  minutesToHHMM,
+  scopeMembers,
+  slotCount,
+  type AvailabilityMap,
+  type Grid,
+} from '../lib/slots';
 import { useAvailabilitySaver, type SaveStatus } from '../lib/useAvailabilitySaver';
 
 const POLL_MS = 30_000;
@@ -89,6 +98,17 @@ export default function Room() {
       document.removeEventListener('visibilitychange', onVisible);
     };
   }, [load]);
+
+  /** 결과 계산용 availability: 서버 데이터에 아직 저장 전일 수 있는 내 로컬 입력을 덮어쓴 것 */
+  const availability = useMemo<AvailabilityMap>(() => {
+    if (!data || !myGrid || !gridMatches(myGrid, data)) return data?.availability ?? {};
+    return { ...data.availability, [data.me.id]: gridToAvailability(data.dates, myGrid) };
+  }, [data, myGrid]);
+
+  // 결과 범위. 곡 선택은 6단계에서 추가 — 지금은 항상 전체합주(방 멤버 전원)
+  const selectedSongIds: number[] = [];
+  const memberIds = useMemo(() => data?.members.map((m) => m.id) ?? [], [data]);
+  const scope = useMemo(() => scopeMembers([], {}, memberIds), [memberIds]);
 
   /** 확인 → API 호출 → 다시 불러오기. 실패하면 알림. */
   async function act(confirmMsg: string | null, fn: () => Promise<unknown>, after?: () => void) {
@@ -242,10 +262,13 @@ export default function Room() {
           />
         </section>
 
-        <section className="panel">
-          <h2>결과 보기</h2>
-          <p className="muted">히트맵은 다음 단계(5단계)에서 추가됩니다.</p>
-        </section>
+        <ResultPanel
+          data={data}
+          availability={availability}
+          slotCount={slotCount(data.room.dayStart, data.room.dayEnd, data.room.slotMinutes)}
+          scope={scope}
+          selectedSongs={data.songs.filter((s) => selectedSongIds.includes(s.id))}
+        />
       </div>
     </div>
   );

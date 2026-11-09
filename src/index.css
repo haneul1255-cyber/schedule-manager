@@ -108,3 +108,28 @@ h2 { font-size: 1.1rem; margin: 0 0 12px; }
 .save-status { font-size: 0.85rem; color: var(--muted); }
 .save-status.saved { color: var(--accent); }
 .save-status.error { color: var(--danger); }
+
+:root {
+  --heat-rgb: 46, 139, 87;
+  --heat-full: #14532d;
+  --heat-full-edge: #0b3b1f;
+}
+h3 { font-size: 1rem; margin: 0; }
+.scope-line { margin: 4px 0 4px !important; }
+.result-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 10px 0; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; }
+.legend { display: inline-flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; color: var(--muted); }
+.legend-item { display: inline-flex; align-items: center; gap: 3px; }
+.legend-swatch { width: 14px; height: 14px; border: 1px solid var(--grid-line); border-radius: 3px; display: inline-block; }
+.hint-line-top { margin-top: 8px !important; }
+.block-list { margin: 0 0 6px; padding-left: 1.4em; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; }
+
+.tooltip {
+  position: fixed; z-index: 50; max-width: 280px; padding: 8px 10px;
+  background: #1f2328; color: #f6f8fa; border-radius: 6px; font-size: 0.8rem; line-height: 1.45;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); pointer-events: auto;
+}
+.tooltip .tip-title { margin-bottom: 4px; }
+.tooltip .tip-ok { color: #8ee0b0; }
+.tooltip .tip-no { color: #ffaba8; }
+.tooltip .tip-songs { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 4px; padding-top: 4px; border-top: 1px solid #444c56; }
