@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './lib/auth';
+import Join from './pages/Join';
 import Login from './pages/Login';
+import Room from './pages/Room';
 import Rooms from './pages/Rooms';
 import Signup from './pages/Signup';
 
@@ -69,6 +71,22 @@ export default function App() {
             element={
               <RequireAuth>
                 <Rooms />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/join/:code"
+            element={
+              <RequireAuth>
+                <Join />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/rooms/:id"
+            element={
+              <RequireAuth>
+                <Room />
               </RequireAuth>
             }
           />

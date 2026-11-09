@@ -92,3 +92,8 @@ export async function sha256Hex(input: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', encoder.encode(input));
   return toHex(new Uint8Array(digest));
 }
+
+/** 방 ID·초대 코드용 추측 불가능한 랜덤 문자열 (12바이트 = 96비트, base64url 16자) */
+export function randomId(bytes = 12): string {
+  return toBase64Url(randomBytes(bytes));
+}

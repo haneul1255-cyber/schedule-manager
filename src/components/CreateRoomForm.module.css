@@ -1,0 +1,11 @@
+.form { display: flex; flex-direction: column; gap: 16px; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 0.9rem; }
+.field input, .field select {
+  font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--surface); color: var(--fg);
+}
+.nameInput { width: min(100%, 360px); }
+.summary { font-size: 0.85rem; color: var(--muted); font-weight: 400; }
+.actions { display: flex; gap: 8px; }
+.warning { font-size: 0.85rem; color: #9a6700; margin: 0; }

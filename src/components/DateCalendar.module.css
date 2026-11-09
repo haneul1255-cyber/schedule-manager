@@ -1,0 +1,20 @@
+.calendar { user-select: none; max-width: 340px; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.title { font-weight: 600; }
+.navBtn {
+  font: inherit; border: 1px solid var(--border); background: var(--surface); color: var(--fg);
+  border-radius: 6px; width: 32px; height: 32px; cursor: pointer;
+}
+.navBtn:disabled { opacity: 0.4; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.weekday { text-align: center; font-size: 0.75rem; color: var(--muted); padding: 2px 0; }
+.sun { color: #c0392b; }
+.sat { color: #2b6cb0; }
+.day {
+  font: inherit; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--fg); cursor: pointer; font-size: 0.9rem; padding: 0;
+}
+.day:hover:not(:disabled) { border-color: var(--accent); }
+.day:disabled { color: var(--border); cursor: default; background: transparent; }
+.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.today { font-weight: 700; text-decoration: underline; }

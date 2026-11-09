@@ -6,6 +6,58 @@ export interface User {
   displayName: string;
 }
 
+export type RoomRole = 'owner' | 'member';
+
+export interface RoomSummary {
+  id: string;
+  name: string;
+  role: RoomRole;
+  dayStart: number;
+  dayEnd: number;
+  memberCount: number;
+  dateCount: number;
+  firstDate: string | null;
+  lastDate: string | null;
+}
+
+export interface RoomMember {
+  id: number;
+  displayName: string;
+  role: RoomRole;
+}
+
+export interface Song {
+  id: number;
+  title: string;
+  memberIds: number[];
+}
+
+export interface RoomData {
+  room: {
+    id: string;
+    name: string;
+    ownerId: number;
+    inviteCode: string;
+    dayStart: number;
+    dayEnd: number;
+    slotMinutes: number;
+    createdAt: number;
+  };
+  dates: string[];
+  members: RoomMember[];
+  songs: Song[];
+  /** availability[userId][date] = '0101...' */
+  availability: Record<string, Record<string, string>>;
+  me: { id: number; role: RoomRole };
+}
+
+export interface RoomInput {
+  name: string;
+  dates: string[];
+  dayStart: number;
+  dayEnd: number;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -41,4 +93,20 @@ export const api = {
     request<{ user: User }>('POST', '/api/auth/login', { username, password }),
   logout: () => request<{ ok: true }>('POST', '/api/auth/logout'),
   me: () => request<{ user: User | null }>('GET', '/api/auth/me'),
+
+  listRooms: () => request<{ rooms: RoomSummary[] }>('GET', '/api/rooms'),
+  createRoom: (input: RoomInput) => request<{ room: { id: string } }>('POST', '/api/rooms', input),
+  joinRoom: (inviteCode: string) =>
+    request<{ roomId: string; joined: boolean }>('POST', '/api/rooms/join', { inviteCode }),
+  getRoom: (id: string) => request<RoomData>('GET', `/api/rooms/${encodeURIComponent(id)}`),
+  updateRoom: (id: string, input: Partial<RoomInput>) =>
+    request<RoomData>('PATCH', `/api/rooms/${encodeURIComponent(id)}`, input),
+  deleteRoom: (id: string) => request<{ ok: true }>('DELETE', `/api/rooms/${encodeURIComponent(id)}`),
+  leaveRoom: (id: string) => request<{ ok: true }>('POST', `/api/rooms/${encodeURIComponent(id)}/leave`),
+  transferOwner: (id: string, userId: number) =>
+    request<{ ok: true }>('POST', `/api/rooms/${encodeURIComponent(id)}/transfer`, { userId }),
+  kickMember: (id: string, userId: number) =>
+    request<{ ok: true }>('DELETE', `/api/rooms/${encodeURIComponent(id)}/members/${userId}`),
+  regenerateInvite: (id: string) =>
+    request<{ inviteCode: string }>('POST', `/api/rooms/${encodeURIComponent(id)}/invite-code`),
 };
