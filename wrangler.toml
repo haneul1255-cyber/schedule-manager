@@ -5,7 +5,5 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "band-schedule-db"
-# 배포 전 `wrangler d1 create band-schedule-db`로 받은 ID로 교체한다.
-# 로컬 개발(--local)에서는 이 값이 실제 DB를 가리키지 않아도 동작한다.
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "e42146b6-fbda-46ba-bdd1-298a233a4146"
 migrations_dir = "migrations"
