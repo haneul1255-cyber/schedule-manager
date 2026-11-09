@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, type User } from './api';
+import { api, setUnauthorizedHandler, type User } from './api';
 
 interface AuthState {
   user: User | null;
@@ -16,6 +16,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null)); // RequireAuth가 현재 경로를 next로 로그인 화면에 보낸다
+    return () => setUnauthorizedHandler(null);
+  }, []);
 
   useEffect(() => {
     api

@@ -85,6 +85,12 @@ export class ApiError extends Error {
   }
 }
 
+/** 세션 만료 등으로 401을 받았을 때 호출 (AuthProvider가 등록) */
+let unauthorizedHandler: (() => void) | null = null;
+export function setUnauthorizedHandler(fn: (() => void) | null): void {
+  unauthorizedHandler = fn;
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let res: Response;
   try {
@@ -99,6 +105,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
   const data = (await res.json().catch(() => null)) as { error?: string } | null;
   if (!res.ok) {
+    // 로그인 실패(401)는 정상 흐름이므로 제외. 그 밖의 401은 세션 만료 → 로그인 화면으로.
+    if (res.status === 401 && !path.startsWith('/api/auth/')) unauthorizedHandler?.();
     if (data?.error) throw new ApiError(res.status, data.error);
     // JSON 에러 본문이 없는 502~504: API 서버가 꺼져 있거나 응답하지 않음
     // (로컬 개발에서는 `npm run dev:api`가 실행 중이 아닐 때 vite 프록시가 502를 돌려준다)

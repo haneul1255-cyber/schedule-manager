@@ -38,3 +38,8 @@
 .heat { cursor: pointer; touch-action: manipulation; }
 .heat.full { box-shadow: inset 0 0 0 1px var(--heat-full-edge); }
 .heat.active { outline: 2px solid var(--fg); outline-offset: -2px; position: relative; z-index: 1; }
+
+/* 터치 기기: 손가락으로 누르기 쉽게 칸을 조금 크게 */
+@media (pointer: coarse) {
+  .cell { height: 24px; }
+}

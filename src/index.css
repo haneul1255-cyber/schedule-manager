@@ -169,3 +169,27 @@ h3 { font-size: 1rem; margin: 0; }
 .member-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .song-logs { margin-top: 12px; padding: 10px; background: var(--bg); border-radius: var(--radius); font-size: 0.85rem; }
 .song-logs ul { margin: 6px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 3px; }
+
+/* ---- 공통 보조 ---- */
+.panel h1, .room-name { overflow-wrap: anywhere; }
+.error-box { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+a.btn { display: inline-block; text-decoration: none; }
+.touch-only { display: none; }
+@media (pointer: coarse) {
+  .touch-only { display: inline; }
+}
+
+/* ---- 모바일 ---- */
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+  .panel { padding: 12px; }
+  h1 { font-size: 1.3rem; }
+  .app-header { padding: 8px 12px; }
+  .auth-card { margin: 16px auto; padding: 16px; }
+  .panel-head { flex-direction: column; align-items: stretch; }
+  .panel-head.compact { flex-direction: row; align-items: center; }
+  .sync-bar { justify-content: space-between; }
+  .room-columns { gap: 12px; }
+  .member-chip { font-size: 0.85rem; }
+  .tooltip { max-width: calc(100vw - 16px); }
+}

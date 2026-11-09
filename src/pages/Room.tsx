@@ -78,11 +78,18 @@ export default function Room() {
       setLoadError(null);
       setLastLoadedAt(new Date());
     } catch (e) {
-      setLoadError(e as ApiError);
+      const err = e as ApiError;
+      // 내보내졌거나 방이 삭제된 경우: 남아 있는 화면을 지우고 안내
+      if (err.status === 403) {
+        discard();
+        setData(null);
+        setMyGrid(null);
+      }
+      setLoadError(err);
     } finally {
       setLoading(false);
     }
-  }, [id, applyData]);
+  }, [id, applyData, discard]);
 
   // 첫 로드 + 30초 폴링 (탭이 보이지 않을 때는 쉬고, 다시 보이면 즉시 갱신)
   useEffect(() => {
@@ -154,11 +161,24 @@ export default function Room() {
   }
 
   if (loadError && !data) {
+    const forbidden = loadError.status === 403;
     return (
       <section className="panel">
-        <h1>방을 열 수 없습니다</h1>
+        <h1>{forbidden ? '방에 접근할 수 없습니다' : '방을 불러오지 못했습니다'}</h1>
         <p className="error">{loadError.message}</p>
-        <Link to="/">내 방 목록으로</Link>
+        {forbidden && (
+          <p className="muted small">방이 삭제되었거나 방에서 내보내졌을 수 있습니다. 초대 링크로 다시 참가할 수 있어요.</p>
+        )}
+        <div className="toolbar" style={{ marginTop: 12 }}>
+          {!forbidden && (
+            <button className="btn" onClick={() => void load()}>
+              다시 시도
+            </button>
+          )}
+          <Link to="/" className="btn">
+            내 방 목록으로
+          </Link>
+        </div>
       </section>
     );
   }
@@ -282,6 +302,7 @@ export default function Room() {
           </div>
           <p className="muted small hint-line">
             가능한 시간을 드래그해서 칠하세요. 칠해진 칸에서 시작하면 지워집니다.
+            <span className="touch-only"> 화면을 스크롤하려면 왼쪽 시간 영역이나 그리드 바깥을 밀어 주세요.</span>
           </p>
           <AvailabilityGrid
             dates={data.dates}

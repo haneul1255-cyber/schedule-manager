@@ -11,12 +11,14 @@ export default function Rooms() {
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
+    setError(null);
     api
       .listRooms()
       .then((r) => setRooms(r.rooms))
       .catch((e: Error) => setError(e.message));
-  }, []);
+  };
+  useEffect(load, []);
 
   return (
     <div className="stack">
@@ -29,7 +31,14 @@ export default function Rooms() {
             </button>
           )}
         </div>
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <div className="error-box">
+            <p className="error">{error}</p>
+            <button className="btn small" onClick={load}>
+              다시 시도
+            </button>
+          </div>
+        )}
         {!rooms && !error && <p className="muted">불러오는 중…</p>}
         {rooms && rooms.length === 0 && (
           <p className="muted">아직 참여한 방이 없습니다. 방을 만들거나 초대 링크로 참가해 보세요.</p>

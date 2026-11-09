@@ -90,7 +90,17 @@ export default function App() {
               </RequireAuth>
             }
           />
-          <Route path="*" element={<p>페이지를 찾을 수 없습니다. <Link to="/">처음으로</Link></p>} />
+          <Route
+            path="*"
+            element={
+              <section className="panel">
+                <h1>페이지를 찾을 수 없습니다</h1>
+                <p className="muted">
+                  주소를 확인해 주세요. <Link to="/">내 방 목록으로</Link>
+                </p>
+              </section>
+            }
+          />
         </Routes>
       </main>
     </>
