@@ -107,6 +107,8 @@ export const api = {
     request<{ ok: true }>('POST', `/api/rooms/${encodeURIComponent(id)}/transfer`, { userId }),
   kickMember: (id: string, userId: number) =>
     request<{ ok: true }>('DELETE', `/api/rooms/${encodeURIComponent(id)}/members/${userId}`),
+  saveAvailability: (id: string, availability: Record<string, string>) =>
+    request<{ ok: true }>('PUT', `/api/rooms/${encodeURIComponent(id)}/availability`, availability),
   regenerateInvite: (id: string) =>
     request<{ inviteCode: string }>('POST', `/api/rooms/${encodeURIComponent(id)}/invite-code`),
 };

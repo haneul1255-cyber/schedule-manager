@@ -1,5 +1,5 @@
 import { isValidDate } from '../../src/lib/dates';
-import { SLOT_MINUTES } from '../../src/lib/slots';
+import { isValidSlots, SLOT_MINUTES } from '../../src/lib/slots';
 import { HttpError } from './http';
 
 export const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
@@ -90,4 +90,27 @@ export function validateInviteCode(value: unknown): string {
     throw new HttpError(404, '유효하지 않은 초대 링크입니다.');
   }
   return value;
+}
+
+// ---- 가능 시간 ----
+
+/**
+ * PUT /availability 본문 { [date]: slots } 검증.
+ * 날짜는 방의 날짜여야 하고, 문자열은 슬롯 수와 같은 길이의 0/1이어야 한다.
+ */
+export function validateAvailability(
+  body: Record<string, unknown>,
+  roomDates: readonly string[],
+  slotsPerDay: number,
+): [string, string][] {
+  const entries = Object.entries(body);
+  if (entries.length === 0) throw new HttpError(400, '저장할 날짜가 없습니다.');
+  const allowed = new Set(roomDates);
+  for (const [date, slots] of entries) {
+    if (!allowed.has(date)) throw new HttpError(400, `방에 없는 날짜입니다: ${date.slice(0, 20)}`);
+    if (!isValidSlots(slots, slotsPerDay)) {
+      throw new HttpError(400, `가능 시간 형식이 올바르지 않습니다 (${date}). 새로고침 후 다시 시도해 주세요.`);
+    }
+  }
+  return entries as [string, string][];
 }
