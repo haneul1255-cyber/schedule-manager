@@ -4,3 +4,6 @@ dist
 .dev.vars
 *.tsbuildinfo
 .DS_Store
+
+# 로컬 전용 문서 (GitHub에 올리지 않음)
+README.local.md
